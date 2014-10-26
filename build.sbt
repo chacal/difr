@@ -3,6 +3,8 @@ import java.io.File
 import sbt.IO._
 import ScalateKeys._
 
+scalaVersion := "2.9.3"
+
 seq(scalateSettings:_*)
 
 scalateTemplateConfig in Compile <<= (sourceDirectory in Compile) { base =>
