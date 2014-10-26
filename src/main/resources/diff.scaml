@@ -72,29 +72,30 @@
         %td {{comments}}
   %body
     .container
-      %h1 Difr
-      - for (log <- logs; diff <- log.diffs; details <- diff.details)
+      - for (log <- logs)
         .log
-          %span Commit: #{log.commitHash}
-          %span Author: #{log.author}
-          %span Date: #{log.date}
-          %span #{log.comment}
-          .diff
-            %table
-              %tr.meta
-                %td.file(colspan="3")= details.newFile
-              - for (chunk <- details.chunks)
-                %tr.chunk
-                  %td.lineno.first ...
-                  %td.lineno.second ...
-                  %td
-                    %pre= range(chunk)
-                - for ((first, second, changeLine) <- withLineNo(chunk))
-                  %tr.line(class={lineTypeOf(changeLine)})
-                    %td.lineno.first= first.map(_.toString)
-                    %td.lineno.second= second.map(_.toString)
+          %span.comment #{log.comment}
+          .infoContainer
+            %span.author #{log.author}
+            %span.date #{log.date}
+            %span.commitHash #{log.commitHash}
+          - for (diff <- log.diffs; details <- diff.details)
+            .diff
+              %table
+                %tr.meta
+                  %td.file(colspan="3")= details.newFile
+                - for (chunk <- details.chunks)
+                  %tr.chunk
+                    %td.lineno.first ...
+                    %td.lineno.second ...
                     %td
-                      %pre= prefix(changeLine) + changeLine.line
+                      %pre= range(chunk)
+                  - for ((first, second, changeLine) <- withLineNo(chunk))
+                    %tr.line(class={lineTypeOf(changeLine)})
+                      %td.lineno.first= first.map(_.toString)
+                      %td.lineno.second= second.map(_.toString)
+                      %td
+                        %pre= prefix(changeLine) + changeLine.line
     %script(src="http://code.jquery.com/jquery-1.10.1.min.js")
     %script(src="http://cdnjs.cloudflare.com/ajax/libs/ICanHaz.js/0.10/ICanHaz.min.js")
     - if (ext)
