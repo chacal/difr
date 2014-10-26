@@ -7,3 +7,5 @@ libraryDependencies += "de.matrixweb.smaller" % "cssembed" % "0.6.1"
 libraryDependencies += "com.yahoo.platform.yui" % "yuicompressor" % "2.4.7"
 
 addSbtPlugin("com.mojolly.scalate" % "xsbt-scalate-generator" % "0.4.2")
+
+addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.6.0")
