@@ -120,11 +120,11 @@ object GitDiffParser extends RegexParsers {
 
   def diffChunks: Parser[List[ChangeChunk]] = rep1(changeChunk)
 
-  def oldFile: Parser[String] = "--- " ~> """[^\n]*""".r <~ newline ^^ {
+  def oldFile: Parser[String] = "--- " ~> anythingWithoutNewLine <~ newline ^^ {
     s => s.dropWhile(_ != '/').drop(1)
   }
 
-  def newFile: Parser[String] = "+++ " ~> """[^\n]*""".r <~ newline ^^ {
+  def newFile: Parser[String] = "+++ " ~> anythingWithoutNewLine <~ newline ^^ {
     s => s.dropWhile(_ != '/').drop(1)
   }
 
