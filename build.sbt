@@ -13,7 +13,7 @@ scalateTemplateConfig in Compile <<= (sourceDirectory in Compile) { base =>
   )
 }
 
-defaultExcludes in Compile in unmanagedResources := "*.scaml"
+excludeFilter in Compile in unmanagedResources := "*.scaml"
 
 assemblySettings
 
