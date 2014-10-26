@@ -107,22 +107,20 @@ object Tool {
     val conf = parseArgs(args)
     if (conf.help()) conf.printHelp()
     else try {
-      for (diffs <- usingIn(conf.in.get, parse)) {
-        usingOut(conf.out.get, {
-          writer =>
-            engine.layout("/diff.scaml", writer, Map(
-              "diffs" -> diffs,
-              "ext" -> conf.ext()
-            ))
-            writer.flush()
-        })
-      }
+      val logs = usingIn(conf.in.get, parse)
+      usingOut(conf.out.get, {
+        writer =>
+          engine.layout("/diff.scaml", writer, Map(
+            "logs" -> logs,
+            "ext" -> conf.ext()
+          ))
+          writer.flush()
+      })
     } finally {
       engine.compiler.asInstanceOf[ScalaCompiler].compiler.askShutdown()
     }
   }
 
-  private def parse(reader: Reader): Option[List[GitDiff]] =
-    GitDiffParser.asDiffs(reader)
+  private def parse(reader: Reader): List[GitLog] = GitDiffParser.asGitLogs(reader)
 
 }

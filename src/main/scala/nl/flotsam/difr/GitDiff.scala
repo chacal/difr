@@ -22,6 +22,8 @@ package nl.flotsam.difr
 import util.parsing.combinator._
 import java.io.Reader
 
+case class GitLog(commitHash: String, author: String, date: String, comment: String, diffs: List[GitDiff])
+
 case class GitDiff(cmd: String, op: FileOperation, details: Option[GitDiffDetails])
 
 case class GitDiffDetails(oldFile: String, newFile: String, chunks: List[ChangeChunk])
@@ -57,7 +59,27 @@ object GitDiffParser extends RegexParsers {
 
   override def skipWhitespace = false
 
-  def allDiffs: Parser[List[GitDiff]] = rep1(gitDiff)
+  def gitLogs = rep1(gitLog <~ opt(newline))
+
+  def gitLog = commitHash ~ merge ~ author ~ date ~ comment ~ allDiffs ^^ {
+    case h ~ m ~ a ~ d ~ c ~ diffs => GitLog(h, a, d, c, diffs)
+  }
+
+  def commitHash: Parser[String] = "commit " ~> anythingWithoutNewLine <~ newline
+
+  def merge: Parser[Option[String]] = opt("Merge: " ~> anythingWithoutNewLine <~ newline)
+
+  def author: Parser[String] = "Author: " ~> anythingWithoutNewLine <~ newline
+
+  def date: Parser[String] = "Date:   " ~> anythingWithoutNewLine <~ newline
+
+  def comment: Parser[String] = newline ~> rep1(commentLine <~ newline) <~ newline ^^ {
+    case commentLines => commentLines.mkString("\n")
+  }
+
+  def commentLine: Parser[String] = "    " ~> anythingWithoutNewLine
+
+  def allDiffs: Parser[List[GitDiff]] = rep(gitDiff)
 
   def gitDiff: Parser[GitDiff] = diffHeader ~ fileOperation ~ (gitDiffDetails | gitDiffDetailsMissing) ^^ {
     case files ~ op ~ details => GitDiff(files, op, details)
@@ -137,11 +159,12 @@ object GitDiffParser extends RegexParsers {
     _.toInt
   }
 
+  def anythingWithoutNewLine: Parser[String] = """[^\n]*""".r
+
   def parse(str: String) = parseAll(allDiffs, str)
 
-  def asDiffs(reader: Reader) = parseAll(allDiffs, reader) match {
-    case Success(s, _) => Some(s)
+  def asGitLogs(reader: Reader): List[GitLog] = parseAll(gitLogs, reader) match {
+    case Success(s, _) => s
     case NoSuccess(msg, next) => sys.error(msg + " at " + next.pos)
   }
-
 }
