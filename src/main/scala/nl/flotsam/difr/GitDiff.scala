@@ -22,7 +22,7 @@ package nl.flotsam.difr
 import util.parsing.combinator._
 import java.io.Reader
 
-case class GitLog(commitHash: String, author: String, date: String, comment: String, diffs: List[GitDiff])
+case class GitLog(repoName: Option[String], commitHash: String, author: String, date: String, comment: String, diffs: List[GitDiff])
 
 case class GitDiff(cmd: String, op: FileOperation, details: Option[GitDiffDetails])
 
@@ -61,17 +61,19 @@ object GitDiffParser extends RegexParsers {
 
   def gitLogs = rep1(gitLog <~ opt(newline))
 
-  def gitLog = commitHash ~ merge ~ author ~ date ~ comment ~ allDiffs ^^ {
-    case h ~ m ~ a ~ d ~ c ~ diffs => GitLog(h, a, d, c, diffs)
+  def gitLog = opt(repoName) ~ commitHash ~ merge ~ author ~ date ~ comment ~ allDiffs ^^ {
+    case repoName ~ h ~ m ~ a ~ d ~ c ~ diffs => GitLog(repoName, h, a, d, c, diffs)
   }
+
+  def repoName = "Repository " ~> anythingWithoutNewLine <~ newline
 
   def commitHash: Parser[String] = "commit " ~> anythingWithoutNewLine <~ newline
 
   def merge: Parser[Option[String]] = opt("Merge: " ~> anythingWithoutNewLine <~ newline)
 
-  def author: Parser[String] = "Author: " ~> anythingWithoutNewLine <~ newline
+  def author: Parser[String] = "Author: " ~> anythingWithoutNewLine <~ newline | "Commit:     " ~> anythingWithoutNewLine <~ newline
 
-  def date: Parser[String] = "Date:   " ~> anythingWithoutNewLine <~ newline
+  def date: Parser[String] = "Date:   " ~> anythingWithoutNewLine <~ newline | "CommitDate: " ~> anythingWithoutNewLine <~ newline
 
   def comment: Parser[String] = newline ~> rep1(commentLine <~ newline) <~ newline ^^ {
     case commentLines => commentLines.mkString("\n")
