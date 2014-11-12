@@ -34,6 +34,8 @@ case class NewFile(mode: Int) extends FileOperation
 
 case class DeletedFile(mode: Int) extends FileOperation
 
+case class AttributeChange(oldMode: String, newMode: String) extends FileOperation
+
 case object UpdatedFile extends FileOperation
 
 sealed trait LineChange {
@@ -100,9 +102,7 @@ object GitDiffParser extends RegexParsers {
     """diff --git[^\n]*""".r <~ newline
 
   def fileOperation: Parser[FileOperation] =
-    opt(deletedFileMode | newFileMode) <~ index ^^ {
-      _ getOrElse UpdatedFile
-    }
+    opt(deletedFileMode | newFileMode) <~ index ^^ { _ getOrElse UpdatedFile } | attributeChange
 
   def index: Parser[Any] = ("index " ~ hash ~ ".." ~ hash) ~> opt(" " ~> mode) <~ newline
 
@@ -112,6 +112,10 @@ object GitDiffParser extends RegexParsers {
 
   def newFileMode: Parser[NewFile] = "new file mode " ~> mode <~ newline ^^ {
     m => NewFile(m)
+  }
+
+  def attributeChange: Parser[AttributeChange] = ("old mode " ~> anythingWithoutNewLine <~ newline) ~ ("new mode" ~> anythingWithoutNewLine <~ newline) ^^ {
+    case oldMode ~ newMode => AttributeChange(oldMode, newMode)
   }
 
   def hash: Parser[String] = """[0-9a-f]{7,8}""".r
