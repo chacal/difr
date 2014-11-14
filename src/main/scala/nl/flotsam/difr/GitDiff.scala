@@ -94,7 +94,7 @@ object GitDiffParser extends RegexParsers {
   }
 
   def gitDiffDetailsMissing: Parser[Option[GitDiffDetails]] =
-    ("""Binary[^\n]*\n""".r | newline) ^^ {
+    ("""Binary[^\n]*\n""".r | newline | "".r) ^^ {
       case _ => None
     }
 
