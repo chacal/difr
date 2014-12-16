@@ -3,4 +3,4 @@
 
 BASEDIR=$(dirname $0)
 
-java -jar "$BASEDIR/target/scala-2.9.3/difr.jar" $*
+java -Xmx512m -jar "$BASEDIR/target/scala-2.9.3/difr.jar" $*
