@@ -22,9 +22,6 @@ package nl.flotsam.difr
 import org.fusesource.scalate.TemplateEngine
 import org.fusesource.scalate.util.{Resource, ResourceLoader}
 import java.io._
-import org.fusesource.scalate.support.ScalaCompiler
-import scala.Some
-import scala.Console
 
 
 /**
@@ -106,7 +103,7 @@ object Tool {
   def main(args: Array[String]) {
     val conf = parseArgs(args)
     if (conf.help()) conf.printHelp()
-    else try {
+    else {
       val logs = usingIn(conf.in.get, parse)
       usingOut(conf.out.get, {
         writer =>
@@ -116,8 +113,6 @@ object Tool {
           ))
           writer.flush()
       })
-    } finally {
-      engine.compiler.asInstanceOf[ScalaCompiler].compiler.askShutdown()
     }
   }
 

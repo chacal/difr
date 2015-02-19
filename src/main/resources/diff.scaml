@@ -41,22 +41,17 @@
     }
   }
 
-  val style = load("/style-min.css")
-  val editorjs = load("/editor-min.js")
+  val style = load("/style.css")
 
 
 -@ val logs: List[GitLog]
--@ val ext: Boolean = false
 
 !!! 5
 %html
   %head
     %title Difr
     %meta(charset="utf-8")
-    - if (ext)
-      %link(href="./style.css" rel="stylesheet")
-    - else
-      %style(type="text/css")= unescape(style)
+    %style(type="text/css")= unescape(style)
     %script#editor(type="text/html")
       %tr.editor
         %td
@@ -97,11 +92,4 @@
                       %td.lineno.second= second.map(_.toString)
                       %td
                         %pre= prefix(changeLine) + changeLine.line
-    %script(src="http://code.jquery.com/jquery-1.10.1.min.js")
-    %script(src="http://cdnjs.cloudflare.com/ajax/libs/ICanHaz.js/0.10/ICanHaz.min.js")
-    - if (ext)
-      %script(src="./editor.js")
-    - else
-      %script
-        - unescape(editorjs)
 
